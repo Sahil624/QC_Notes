@@ -22,7 +22,7 @@
 
 If the above command doesn't work, install dependencies manually with the following commands:
 
-`pip install jupyter notebook jupyterlab qutip matplotlib tkinter ipywidgets`<br>
+`pip install jupyter notebook jupyterlab qutip matplotlib`<br>
 `pip install qiskit==0.45.2 qiskit-aer==0.14.2`
 
 ### Run JupyterLab
