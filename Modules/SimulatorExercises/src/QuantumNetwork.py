@@ -23,11 +23,10 @@ class Quantum_Network():
         self.canvas_size = size_of_board
         self.mode = homeSelf.selectedMode.get()
         self.protocol = homeSelf.selectedProtocol.get()
-        self.message = homeSelf.message_var.get()
-        self.ksu_id_var = homeSelf.ksu_id_var.get()
         self.selectedtask = StringVar()
         self.selectedtask.set(send_message)
         self.window.state('zoomed')
+        self.message_var=StringVar()
         self.continue_btn = 0
         self.node_selection_counter = 0
         self.key_generated = False
@@ -65,7 +64,7 @@ class Quantum_Network():
         
         self.switch_btn_text = 'Switch to arrangement mode'
 
-        name_label = Label(self.left_controls_frame, text = 'Enter the grid size:')
+        name_label = Label(self.left_controls_frame, text = 'Enter the grid size (max value 5) :')
         name_entry = Entry(self.left_controls_frame,textvariable = self.grid_size_var)
         sub_btn=Button(self.left_controls_frame,text = 'Submit', command = self.submit)
 
@@ -120,7 +119,14 @@ class Quantum_Network():
         self.window.mainloop()
 
     def reset(self):
+        global number_of_dots
+        number_of_dots=self.grid_size_var.get()
+        global size_of_board
+        size_of_board = number_of_dots * 100
+        self.canvas_size = number_of_dots * 100
         self.delete_canvas()
+        self.node_list = []
+        self.edge_list = []
         self.node_selection_counter=0
         self.key_generated = ''
         self.decoded_message = ''
@@ -158,33 +164,43 @@ class Quantum_Network():
     
     def send_message_classical(self):
             if self.selectedtask.get() == send_message_quantum:
-                binary_message = ''.join(format(ord(i), '08b') for i in self.message_var.get())
-                decoded_message = threestage_message_transmission(binary_message)
-                self.decoded_message = self.BinarytoString(decoded_message)
                 sent_label = Label(self.left_controls_frame, text = 'Message sent from Alice: '+self.message_var.get())
                 sent_label.grid(row=6,column=0, padx=5, sticky='W')
+                binary_message = ''.join(format(ord(i), '08b') for i in self.message_var.get())
+                encoded_label = Label(self.left_controls_frame, text = 'ASCII for message('+self.message_var.get()+ '): '+binary_message)
+                encoded_label.grid(row=7,column=0, padx=5, sticky='W')
+                decoded_message = threestage_message_transmission(binary_message)
+                encoding_label = Label(self.left_controls_frame, text = 'Encoded message using Z-basis')
+                encoding_label.grid(row=8,column=0, padx=5, sticky='W')
+                decoding_label = Label(self.left_controls_frame, text = 'Qubits Measurement Completed')
+                decoding_label.grid(row=9,column=0, padx=5, sticky='W')
+                self.decoded_message = self.BinarytoString(decoded_message)
                 recieved_label = Label(self.left_controls_frame, text = 'Message Recieved to Bob: '+self.decoded_message)
-                recieved_label.grid(row=7,column=0, padx=5, sticky='W')
+                recieved_label.grid(row=10,column=0, padx=5, sticky='W')
             else:
                 binary_message = ''.join(format(ord(i), '08b') for i in self.message_var.get())
-                key_message = self.key_generated
-                key_message = key_message.zfill(len(binary_message))
-                encoded_message = self.perform_xor(binary_message, key_message)
-                decoded_message = self.perform_xor(key_message, encoded_message)
-                self.decoded_message = self.BinarytoString(decoded_message)
                 sent_label = Label(self.left_controls_frame, text = 'Message sent from Alice: '+self.message_var.get())
                 sent_label.grid(row=6,column=0, padx=5, sticky='W')
+                key_message = self.key_generated
+                key_message = key_message.zfill(len(binary_message))
+                encoded_ASCII_label = Label(self.left_controls_frame, text = 'ASCII for message('+self.message_var.get()+ '): '+binary_message)
+                encoded_ASCII_label.grid(row=7,column=0, padx=5, sticky='W')
+                encoded_message = self.perform_xor(binary_message, key_message)
+                encoded_label = Label(self.left_controls_frame, text = 'Encoded message for message('+self.message_var.get()+ '): '+encoded_message)
+                encoded_label.grid(row=8,column=0, padx=5, sticky='W')
+                decoded_message = self.perform_xor(key_message, encoded_message)
+                self.decoded_message = self.BinarytoString(decoded_message)
+
                 recieved_label = Label(self.left_controls_frame, text = 'Message Recieved to Bob: '+self.decoded_message)
-                recieved_label.grid(row=7,column=0, padx=5, sticky='W')
+                recieved_label.grid(row=9,column=0, padx=5, sticky='W')
 
     def ball_movement(self,edge_coords, start_node ):
             channel_count = 0
             channel_order_temp = None
-            if replay_option == "Back":
-                channel_order_temp = channel_order[::-1]
+            # if replay_option == "Back":
+            #     channel_order_temp = channel_order[::-1]
 
-            else:
-                channel_order_temp = channel_order
+            channel_order_temp = channel_order
             setGlobalValues(channel_order_temp, channel_count, self.window)
             ball_coords = [edge_coords[0], edge_coords[1]]
             end_ball_coords = [edge_coords[2], edge_coords[3]]
@@ -238,7 +254,7 @@ class Quantum_Network():
                 start_node = next(x for x in self.node_list if x.id == self.edge_list[i].nodes[0]).position
                 self.ball_movement(edge_coords, start_node)
 
-        self.message_var=StringVar()
+        
         message_label = Label(self.left_controls_frame, text = 'Enter a message to communicate:')
         message_entry = Entry(self.left_controls_frame,textvariable = self.message_var)
         message_label.grid(row=5,column=0, padx=5, sticky='W')
@@ -374,7 +390,7 @@ class Quantum_Network():
         row_id = adjacent_node.id+clicked_node.id
         edge = Edge(row_id, line_id, line_id2, row, [sx, sy, ex, ey], 0, [adjacent_node.id, clicked_node.id] )
         self.edge_list.append(edge)
-        self.include_edge_error(edge)
+        # self.include_edge_error(edge)
         self.update_node_color(adjacent_node, dot_selected_color)
 
     def update_nodes(self, clicked_node):
@@ -420,6 +436,9 @@ class Quantum_Network():
         [r,c] = [int(clicked_node.id[0]), int(clicked_node.id[1])]
         if self.node_selection_counter == 0:
             self.first_node_selected = r*number_of_dots+c
+            if (len(self.edge_list)) == 0:
+                start(self.window)
+            self.update_node_color(clicked_node, dot_selected_color)
         elif self.node_selection_counter == 1:
             shortest_node_path = self.dijkstra(self.first_node_selected,r*number_of_dots+c)
             self.node_selection_counter = len(shortest_node_path)-1
@@ -431,11 +450,11 @@ class Quantum_Network():
                     [r1,c1] = [n2//number_of_dots, n2%number_of_dots]
                     second_node = next(x for x in self.node_list if x.id == str(r1)+str(c1))
                     self.make_edge_between_nodes(first_node, second_node)
+                    if (len(self.edge_list)) == 0:
+                        start(self.window)
+                    self.update_node_color(clicked_node, dot_selected_color)
+            self.end_selection()
             
-        if (len(self.edge_list)) == 0:
-            start(self.window)
-        self.update_node_color(clicked_node, dot_selected_color)
-        
 
     def node_click(self, event):
         event_position = [event.x, event.y]

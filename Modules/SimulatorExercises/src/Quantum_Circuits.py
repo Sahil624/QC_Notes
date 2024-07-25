@@ -8,6 +8,7 @@ from numpy.random import randint
 from qiskit.extensions import UnitaryGate
 from qiskit.circuit.library import IGate  
 
+
 quantumcirc= None
 window_local = None
 canvas_widget = None
@@ -223,6 +224,6 @@ def threestage_message_transmission(bits):
 
     # Encode the message
     message = threestage_encode_message(bits, U_A, U_B, n)
-    decoded_message = threestage_decode_message(message, n )
+    decoded_message = threestage_decode_message(message, n)
     return decoded_message
     

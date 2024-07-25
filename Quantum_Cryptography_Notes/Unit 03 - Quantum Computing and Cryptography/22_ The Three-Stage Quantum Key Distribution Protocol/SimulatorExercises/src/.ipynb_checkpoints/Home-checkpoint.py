@@ -12,7 +12,6 @@ class Home():
         self.HomeWindow = Tk()
         self.HomeWindow.title('Quantum Key Distribution Network') 
         self.page = 1
-        self.HomeWindow.minsize(450, 300)
 
         l = Label(self.HomeWindow, text = "Welcome !!!")
         l.config(font =("Courier", 16))
@@ -21,8 +20,8 @@ class Home():
         self.name_var=IntVar()
         self.name_var.set(5)
 
-        # ksu_id_label = Label(self.HomeWindow, text = 'Enter your Student ID:')
-        # ksu_id_entry = Entry(self.HomeWindow,textvariable = self.ksu_id_var)
+        ksu_id_label = Label(self.HomeWindow, text = 'Enter your Student ID:')
+        ksu_id_entry = Entry(self.HomeWindow,textvariable = self.ksu_id_var)
 
         mode_label = Label(self.HomeWindow, text = 'Select the mode')
         self.selectedMode = StringVar()
@@ -56,8 +55,8 @@ class Home():
         name_entry = Entry(self.HomeWindow,textvariable = self.name_var)
         
         l.grid(row=0, column=0, padx=20, pady=20, sticky='E')
-        # ksu_id_label.grid(row=1, column=0, padx=20, pady=20, sticky='W')
-        # ksu_id_entry.grid(row=1, column=1, padx=20, pady=20, sticky='W')
+        ksu_id_label.grid(row=1, column=0, padx=20, pady=20, sticky='W')
+        ksu_id_entry.grid(row=1, column=1, padx=20, pady=20, sticky='W')
         mode_label.grid(row=2, column=0, padx=20, sticky='W')
         r1.grid(row=3, column=0, padx=35, sticky='W')
         r2.grid(row=4, column=0,padx=35, sticky='W')
@@ -65,13 +64,40 @@ class Home():
         r3.grid(row=6, column=0, padx=35, sticky='W')
         r4.grid(row=7, column=0,padx=35,sticky='W')
 
-        # name_label.grid(row=14,column=0, padx=20, pady=20, sticky='W')
-        # name_entry.grid(row=14,column=1, padx=20, pady=20, sticky='W')
+        # task_label.grid(row=8, column=0, padx=20, sticky='W')
+        # r5.grid(row=9, column=0, padx=35, sticky='W')
+        # r6.grid(row=10, column=0,padx=35,sticky='W')
+        # r7.grid(row=11, column=0,padx=35,sticky='W')
+        # message_label.grid(row=12,column=0, padx=35, sticky='W')
+        # message_entry.grid(row=12,column=1, padx=20, sticky='W')
+        # key_label.grid(row=13,column=0, padx=35, sticky='W')
+        # key_entry.grid(row=13,column=1, padx=20, sticky='W')
+
+        name_label.grid(row=14,column=0, padx=20, pady=20, sticky='W')
+        name_entry.grid(row=14,column=1, padx=20, pady=20, sticky='W')
 
         sub_btn=Button(self.HomeWindow,text = 'Submit', command= self.onSubmit)
         sub_btn.grid(row=15, padx=20, pady=20,  sticky='E')
         self.HomeWindow.mainloop()
+    
+    # def mainloop(self):
+    #     self.HomeWindow.mainloop()
+    def BinarytoString(self, binary):  
+        str_data =' '
+        binary_data=''.join([str(item) for item in binary])
+        str_data =  ''.join(chr(int(binary_data[i:i+8], 2)) for i in range(0, len(binary_data), 8))
+        return str_data
+    def perform_xor(self, a ,b):
+        # Initialize the result string
+        result = ""
 
+        # Perform XOR operation on each bit
+        for bit_a, bit_b in zip(a, b):
+                if bit_a == bit_b:
+                    result += "0"
+                else:
+                    result += "1"
+        return result
     def onSubmit(self):
             self.HomeWindow.destroy()
             instance = QNetwork(self)

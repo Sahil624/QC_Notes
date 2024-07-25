@@ -197,6 +197,7 @@ class NotebookGenerator:
             notebook = new_notebook()
             selected_notebook_cells = []
             selected_notebook_ids = []
+            order = 1
             seen = set()
             visited = set()
             total_time = (self.estimated_time.value and int(self.estimated_time.value)) or 10000
@@ -205,7 +206,7 @@ class NotebookGenerator:
             Below two blocks of code iterates through all nodes using DFS approach and caluculate the total Profit for each node using
             profits of child nodes.
             '''
-            def dfsWeightCalc(cellId, curr_profit):
+            def dfsWeightCalc(cellId, curr_profit, order):
                 '''
                 This Method iterates through the neighbouring (or child) nodes using DFS approach and caluculate the total
                 profit for all the nodes using profits of child nodes.
@@ -221,7 +222,9 @@ class NotebookGenerator:
                     if neighbour not in visited:
                         visited.add(neighbour)
                         next_profit = curr_profit
-                        fracProfit += next_profit/int(neighbour_cell.metadata.cell_details.cell_estimated_time) + dfsWeightCalc(neighbour, next_profit)
+                        fracProfit += next_profit/int(neighbour_cell.metadata.cell_details.cell_estimated_time) + dfsWeightCalc(neighbour, next_profit, order)
+                        neighbour_cell.order = order
+                        order += 1
                         neighbour_cell.profit = next_profit
                         neighbour_cell.fracProfit = fracProfit
                         totlfracProfit += fracProfit
@@ -241,7 +244,9 @@ class NotebookGenerator:
                 if  concept not in visited:
                     visited.add(concept)
                     curr_profit = 1
-                    fracProfit = dfsWeightCalc(concept,curr_profit)
+                    fracProfit = dfsWeightCalc(concept,curr_profit, order)
+                    concept_cell.order = order
+                    order += 1
                     concept_cell.profit = curr_profit
                     concept_cell.fracProfit = fracProfit+ curr_profit/int(concept_cell.metadata.cell_details.cell_estimated_time)
                     # print(concept,curr_profit, concept_cell.fracProfit)
@@ -306,6 +311,8 @@ class NotebookGenerator:
                         total_time -= cell_time
                         selected_notebook_cells.append(concept_cell)
                         selected_notebook_ids.append(concept)
+                        
+            selected_notebook_cells = sorted(selected_notebook_cells,  key=lambda x: x.fracProfit) 
             for item in selected_notebook_cells:
                 notebook.cells.append(item) 
             with open(f'Modules/Course.ipynb', 'w', encoding='utf-8') as f:
@@ -420,7 +427,7 @@ class NotebookGenerator:
         self.submit_button.on_click(self.on_submit_clicked)
 
         self.estimated_time = Text(placeholder='Estimated Time', disabled=False, layout=Layout(width='500px'))
-        self.estimated_time_label = Label(value='Estimated Time: ')
+        self.estimated_time_label = Label(value='Estimated Time (in mins): ')
 
         self.select_mode = widgets.RadioButtons(
             options=['Concept - Driven Learning Mode', 'Quiz - Driven Learning Mode'],

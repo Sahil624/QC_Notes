@@ -21,19 +21,13 @@ class Quantum_Network():
         self.window = Tk()
         self.window.title('Quantum Key Distribution Network') 
         self.canvas_size = size_of_board
-        # self.mode = homeSelf['selectedMode']
-        # self.protocol = homeSelf['selectedProtocol']
-        # self.message = homeSelf['message_var']
-        # self.ksu_id_var = homeSelf['ksu_id_var']
-        # self.selectedtask = homeSelf['selectedtask']
         self.mode = homeSelf.selectedMode.get()
         self.protocol = homeSelf.selectedProtocol.get()
-        self.message = homeSelf.message_var.get()
-        self.ksu_id_var = homeSelf.ksu_id_var.get()
-        self.selectedtask = homeSelf.selectedtask.get()
         self.window.state('zoomed')
+        self.message_var=StringVar()
         self.continue_btn = 0
         self.node_selection_counter = 0
+        self.key_generated = False
         self.first_node_selected = 0
         self.adjacency_matrix =  [[0 for col in range(number_of_dots*number_of_dots)] for row in range(number_of_dots*number_of_dots)]
 
@@ -67,32 +61,19 @@ class Quantum_Network():
         
         
         self.switch_btn_text = 'Switch to arrangement mode'
-        
-        '''self.switch_btn_text = 'Switch to arrangement mode'
-        self.switch_mode_btn = Button(left_controls_frame,text = self.switch_btn_text, command = self.switch_mode)'''
 
-        name_label = Label(self.left_controls_frame, text = 'Enter the grid size:')
+        name_label = Label(self.left_controls_frame, text = 'Enter the grid size (max value 5) :')
         name_entry = Entry(self.left_controls_frame,textvariable = self.grid_size_var)
         sub_btn=Button(self.left_controls_frame,text = 'Submit', command = self.submit)
 
         reset_btn = Button(self.right_controls_frame,text = 'Reset', command = self.reset)
-        #home_btn = Button(self.right_controls_frame, text='Reset Selection', command=self.onHome)
 
         name_label.grid(row=0,column=0, padx=5, sticky='W')
         name_entry.grid(row=0,column=1, padx=5, sticky='W')
         sub_btn.grid(row=0,column=2, padx= 5, sticky='W')
 
         reset_btn.grid(row=0, column=0, padx=5, sticky='E')
-        #home_btn.grid(row=0,column=1, padx=5, sticky='E')
-
-        #self.switch_mode_btn.grid(row=1, column=0, padx=5,sticky='W')
         self.updateControls()
-
-        '''ksu_id_label = Label(left_controls_frame, text = 'Give the KSU ID:')
-        ksu_id_entry = Entry(left_controls_frame,textvariable = self.ksu_id_var)
-
-        ksu_id_label.grid(row=2, column=0, padx=5, sticky='E')
-        ksu_id_entry.grid(row=2, column=1, padx=5, sticky='E')'''
         self.window.mainloop()
     
     def get_mode(self):
@@ -102,30 +83,12 @@ class Quantum_Network():
         if self.mode == transmission:
             if self.continue_btn:
                 self.continue_btn.destroy()
-            start_transition_btn = Button(self.left_controls_frame, text = 'Start transition', command = self.callTransitionButtonClick)
+            start_transition_btn = Button(self.left_controls_frame, text = 'Generate key', command = self.callTransitionButtonClick)
             start_transition_btn.grid(row=1, column=0, padx=5, sticky='W')
-            # back_btn = Button(self.right_controls_frame,text = 'Back', command = self.back)
-            # back_btn.grid(row=1, column=2, padx=5, sticky='E')
-            # replay_btn = Button(self.right_controls_frame,text = 'Replay', command = self.replay)
-            # replay_btn.grid(row=1,column=3, padx=5, sticky='E')
         else:
             self.continue_btn = Button(self.right_controls_frame, text = 'Continue to transmission Mode', command=self.switch_mode)
-            self.continue_btn.grid(row=1, column=0, sticky='E') 
-  
-    def onHome(self):
-        self.node_selection_counter = 0
-        for edge in self.edge_list:
-            self.canvas.delete(edge.line_id)
-            self.canvas.delete(edge.line_id2)
-        for node in self.node_list:
-            self.update_node_color(node, dot_color)
-        self.edge_list = []
-        self.node_list = []
-        self.qc = intialize_circuit(self.window)
+            self.continue_btn.grid(row=1, column=0, sticky='E')
         
-        #self.window.destroy()
-        # game_instance = Hom()
-        # game_instance.mainloop()
 
     def delete_canvas(self):
         self.canvas.delete('all')
@@ -133,10 +96,8 @@ class Quantum_Network():
     def switch_mode(self):
         if self.mode == transmission:
             self.mode = rearrange
-            #self.switch_mode_btn.configure(text='Switch to transmission mode')
         else:
             self.mode = transmission
-            #self.switch_mode_btn.configure(text='Switch to rearrangement mode')
         self.updateControls()
         for node in self.node_list:
             self.find_adjacent_distances(node)
@@ -156,8 +117,17 @@ class Quantum_Network():
         self.window.mainloop()
 
     def reset(self):
+        global number_of_dots
+        number_of_dots=self.grid_size_var.get()
+        global size_of_board
+        size_of_board = number_of_dots * 100
+        self.canvas_size = number_of_dots * 100
         self.delete_canvas()
+        self.node_list = []
+        self.edge_list = []
         self.node_selection_counter=0
+        self.key_generated = ''
+        self.decoded_message = ''
         path = os.path.dirname(__file__)
         my_file = path+'/map2.jpeg'
         img= ImageTk.PhotoImage(Image.open(my_file))    
@@ -170,53 +140,69 @@ class Quantum_Network():
         self.update_node_color(end_node, dot_selected_color)
         [x.color != dot_selected_color and self.update_node_color(x, dot_disable_color) for x in self.node_list]
 
-    def callTransitionButtonClick(self):
-        global replay_option
-        replay_option = "Click_Button"
-        self.transition()
+    # def callTransitionButtonClick(self):
+    #     global replay_option
+    #     replay_option = "Click_Button"
+    #     self.transition()
 
-    def callTransitionFromReplay(self):
-        global replay_option
-        replay_option = "Replay"
-        self.transition()
-
-    def callTransitionFromBack(self):
-        global replay_option
-        replay_option = "Back"
-        self.transition()
-
-    def transition(self):
-        global gate_count, gate_order, channel_order, channel_count, replay_option
-        self.end_selection()
-        json_String = self.convertToJson(self.edge_list)
-        # print(json_String)
-        #print(self.edge_list)
-        # print(self.ksu_id_var.get())
-        if self.selectedtask == generate_key:
-            if self.protocol == E91:
-                building_circuit(self.node_selection_counter, self.display_frame)
+    def BinarytoString(self, binary):  
+        str_data =' '
+        binary_data=''.join([str(item) for item in binary])
+        str_data =  ''.join(chr(int(binary_data[i:i+8], 2)) for i in range(0, len(binary_data), 8))
+        return str_data
+    
+    def perform_xor(self, a ,b):
+        result = ""
+        for bit_a, bit_b in zip(a, b):
+                if bit_a == bit_b:
+                    result += "0"
+                else:
+                    result += "1"
+        return result
+    
+    def send_message_classical(self):
+            if self.selectedtask.get() == send_message_quantum:
+                sent_label = Label(self.left_controls_frame, text = 'Message sent from Alice: '+self.message_var.get())
+                sent_label.grid(row=6,column=0, padx=5, sticky='W')
+                binary_message = ''.join(format(ord(i), '08b') for i in self.message_var.get())
+                encoded_label = Label(self.left_controls_frame, text = 'ASCII for message('+self.message_var.get()+ '): '+binary_message)
+                encoded_label.grid(row=7,column=0, padx=5, sticky='W')
+                decoded_message = threestage_message_transmission(binary_message)
+                encoding_label = Label(self.left_controls_frame, text = 'Encoded message using Z-basis')
+                encoding_label.grid(row=8,column=0, padx=5, sticky='W')
+                decoding_label = Label(self.left_controls_frame, text = 'Qubits Measurement Completed')
+                decoding_label.grid(row=9,column=0, padx=5, sticky='W')
+                self.decoded_message = self.BinarytoString(decoded_message)
+                recieved_label = Label(self.left_controls_frame, text = 'Message Recieved to Bob: '+self.decoded_message)
+                recieved_label.grid(row=10,column=0, padx=5, sticky='W')
             else:
-                threestage_key_generation(self.node_selection_counter)
-        else:
-            if self.protocol == ThreeStage:
-                binary_message = ''.join(format(ord(i), '08b') for i in self.message)
-                threestage_message_transmission(binary_message)
+                binary_message = ''.join(format(ord(i), '08b') for i in self.message_var.get())
+                sent_label = Label(self.left_controls_frame, text = 'Message sent from Alice: '+self.message_var.get())
+                sent_label.grid(row=6,column=0, padx=5, sticky='W')
+                key_message = self.key_generated
+                key_message = key_message.zfill(len(binary_message))
+                encoded_ASCII_label = Label(self.left_controls_frame, text = 'ASCII for message('+self.message_var.get()+ '): '+binary_message)
+                encoded_ASCII_label.grid(row=7,column=0, padx=5, sticky='W')
+                encoded_message = self.perform_xor(binary_message, key_message)
+                encoded_label = Label(self.left_controls_frame, text = 'Encoded message for message('+self.message_var.get()+ '): '+encoded_message)
+                encoded_label.grid(row=8,column=0, padx=5, sticky='W')
+                decoded_message = self.perform_xor(key_message, encoded_message)
+                self.decoded_message = self.BinarytoString(decoded_message)
 
-        for i in range(len(self.edge_list)):
+                recieved_label = Label(self.left_controls_frame, text = 'Message Recieved to Bob: '+self.decoded_message)
+                recieved_label.grid(row=9,column=0, padx=5, sticky='W')
+
+    def ball_movement(self,edge_coords, start_node ):
             channel_count = 0
             channel_order_temp = None
-            if replay_option == "Back":
-                channel_order_temp = channel_order[::-1]
+            # if replay_option == "Back":
+            #     channel_order_temp = channel_order[::-1]
 
             else:
                 channel_order_temp = channel_order
-            #print(channel_order_temp)
             setGlobalValues(channel_order_temp, channel_count, self.window)
-
-            edge_coords = self.canvas.coords(self.edge_list[i].line_id)
             ball_coords = [edge_coords[0], edge_coords[1]]
             end_ball_coords = [edge_coords[2], edge_coords[3]]
-            start_node = next(x for x in self.node_list if x.id == self.edge_list[i].nodes[0]).position
             if start_node != ball_coords:
                 end_ball_coords = ball_coords
                 ball_coords = [edge_coords[2],edge_coords[3]]
@@ -245,50 +231,52 @@ class Quantum_Network():
                     ball_coords[1] -= yinc
                     yinc =  end_ball_coords[1]-ball_coords[1]
                     ball_coords[1] = end_ball_coords[1]
-                # print(ball_coords, xinc, yinc)
                 self.canvas.move(ball,xinc,yinc)
                 self.canvas.update()
             self.canvas.delete(ball)
+
+    def transition(self):
+        global gate_count, gate_order, channel_order, channel_count, replay_option
+        self.end_selection()
+        for i in range(len(self.edge_list)):
+            edge_coords = self.canvas.coords(self.edge_list[i].line_id)
+            start_node = next(x for x in self.node_list if x.id == self.edge_list[i].nodes[0]).position
+            self.ball_movement(edge_coords, start_node)
         
-        # if self.selectedtask == send_message:
-        #     if self.protocol == E91:
-        #         self.message_transmission(self.node_selection_counter)
-        #     # else:
-        #     #     self.message_transmission(2)
-        # self.node_selection_counter = 0        
-        # if(replay_option == "Click_Button"):
-        #     insert(json_String, self.ksu_id_var)
+        if self.protocol == ThreeStage:
+            for i in range(len(self.edge_list)):
+                edge_coords = self.canvas.coords(self.edge_list[len(self.edge_list)-1-i].line_id)
+                start_node = next(x for x in self.node_list if x.id == self.edge_list[len(self.edge_list)-1-i].nodes[1]).position
+                self.ball_movement(edge_coords, start_node)
+            for i in range(len(self.edge_list)):
+                edge_coords = self.canvas.coords(self.edge_list[i].line_id)
+                start_node = next(x for x in self.node_list if x.id == self.edge_list[i].nodes[0]).position
+                self.ball_movement(edge_coords, start_node)
 
-    def replay(self):
-        global replay_option
-        replay_option = "Replay"
-        rows = select(self.ksu_id_var)
-        # print(rows)
-        results = json.loads((rows[0])[0])
-        # print(len(results))
-        self.edge_list = []
-        self.edge_list_temp = []
-        for result in results:
-            nodes = result['_nodes']
-            start_node = next(x for x in self.node_list if x.id == nodes[1])
-            end_node = next(x for x in self.node_list if x.id == nodes[0])
-            self.make_edge_between_nodes(start_node, end_node)
-        # print(self.edge_list)
-        start(self.window)
-        self.callTransitionFromReplay()
+        
+        message_label = Label(self.left_controls_frame, text = 'Enter a message to communicate:')
+        message_entry = Entry(self.left_controls_frame,textvariable = self.message_var)
+        message_label.grid(row=5,column=0, padx=5, sticky='W')
+        message_entry.grid(row=5,column=1, padx=5, sticky='W')
+        send_message_button = Button(self.left_controls_frame,text = 'Send Message', command = self.send_message_classical)
+        send_message_button.grid(row=5,column=2, padx=5, sticky='W')
 
-    def back(self):
-        self.edge_list_temp = self.edge_list
-        if(len(self.edge_list) > 0):
-            result = self.edge_list[len(self.edge_list) - 1]
-            self.edge_list = []
-            if(isinstance(result, Edge)):
-                nodes = result.nodes
-            start_node = next(x for x in self.node_list if x.id == nodes[0])
-            end_node = next(x for x in self.node_list if x.id == nodes[1])
-            self.make_edge_between_nodes(start_node, end_node)
-            self.callTransitionFromBack()
-        self.edge_list = self.edge_list_temp
+        if self.protocol == E91:
+                self.key_generated = building_circuit(self.node_selection_counter, self.display_frame)
+        else:
+                self.key_generated = threestage_key_generation(self.node_selection_counter)
+                r6 = Radiobutton(self.left_controls_frame, text='Send a Message via Classical Channel', value= send_message, variable=self.selectedtask)
+                r7 = Radiobutton(self.left_controls_frame, text='Send a Message via Quantum Channel', value= send_message_quantum, 
+                         variable=self.selectedtask)
+                r6.grid(row=4, column=0,padx=5,sticky='W')
+                r7.grid(row=4, column=1,padx=5,sticky='W')
+
+        if self.key_generated: 
+            key_generated_label = Label(self.left_controls_frame, text = 'key generated: '+self.key_generated)
+            key_generated_label.grid(row=1,column=1, padx=5, sticky='W')
+
+
+            
 
     def find_adjacent_distances(self, selected_node):
         [r,c] = [int(selected_node.id[0]), int(selected_node.id[1])]
@@ -352,7 +340,6 @@ class Quantum_Network():
         if edge.id == 2:
             self.canvas.after(3000, self.canvas.delete, edge.line_id)
             self.canvas.after(6000, lambda:self.delete_edge(edge))
-            #self.row_status[edge.position[1]][edge.position[0]] = 0
         
     def update_node_selection(self, clicked_node):
         # make all node colours to disable except already selected nodes
@@ -364,8 +351,6 @@ class Quantum_Network():
         else:
             clicked_node.status = 0
             self.update_node_color(clicked_node, dot_selection_color)
-        # if self.protocol == E91:
-        #     create_circuit()
         # update adjacent nodes selection status and colors    
         [r,c] = [int(clicked_node.id[0]), int(clicked_node.id[1])]
         for nodeid in [str(r)+str(c-1), str(r)+str(c+1), str(r-1)+str(c), str(r+1)+str(c)]:
@@ -404,7 +389,7 @@ class Quantum_Network():
         row_id = adjacent_node.id+clicked_node.id
         edge = Edge(row_id, line_id, line_id2, row, [sx, sy, ex, ey], 0, [adjacent_node.id, clicked_node.id] )
         self.edge_list.append(edge)
-        self.include_edge_error(edge)
+        # self.include_edge_error(edge)
         self.update_node_color(adjacent_node, dot_selected_color)
 
     def update_nodes(self, clicked_node):
@@ -445,23 +430,17 @@ class Quantum_Network():
             dest = next(x[1] for x in reversed(pathSet) if x[0] == dest)
             path.append(dest)
         return path[::-1]
-    
-    def message_transmission(self, shortest_node_path_length):
-        binary_message = ''.join(format(ord(i), '08b') for i in self.message)
-        recieved_message = transmit_message(shortest_node_path_length, binary_message, self.display_frame)
-        #return ''.join(chr(int(recieved_message[i:i+8], 2)) for i in range(0, len(recieved_message), 8))
-    
-    # def generate_secure_key(self, shortest_node_path):
-    #     #print('here')
         
     def e91_node_click(self, clicked_node):
         [r,c] = [int(clicked_node.id[0]), int(clicked_node.id[1])]
         if self.node_selection_counter == 0:
             self.first_node_selected = r*number_of_dots+c
+            if (len(self.edge_list)) == 0:
+                start(self.window)
+            self.update_node_color(clicked_node, dot_selected_color)
         elif self.node_selection_counter == 1:
             shortest_node_path = self.dijkstra(self.first_node_selected,r*number_of_dots+c)
             self.node_selection_counter = len(shortest_node_path)-1
-            print(self.node_selection_counter)
             for i,n in enumerate(shortest_node_path):
                 if i > 0:
                     [r,c] = [n//number_of_dots, n%number_of_dots]
@@ -470,17 +449,11 @@ class Quantum_Network():
                     [r1,c1] = [n2//number_of_dots, n2%number_of_dots]
                     second_node = next(x for x in self.node_list if x.id == str(r1)+str(c1))
                     self.make_edge_between_nodes(first_node, second_node)
-            # if self.selectedtask == send_message:
-            #     print(shortest_node_path)
-            #     self.message_transmission(shortest_node_path)
-            # else:
-            # self.generate_secure_key(shortest_node_path)
-            #create_entangled_qubits(self.qc, len(shortest_node_path)-1)
+                    if (len(self.edge_list)) == 0:
+                        start(self.window)
+                    self.update_node_color(clicked_node, dot_selected_color)
+            self.end_selection()
             
-        if (len(self.edge_list)) == 0:
-            start(self.window)
-        self.update_node_color(clicked_node, dot_selected_color)
-        
 
     def node_click(self, event):
         event_position = [event.x, event.y]
@@ -490,12 +463,4 @@ class Quantum_Network():
                 self.e91_node_click(clicked_node)
             else:
                 self.update_nodes(clicked_node)
-        self.node_selection_counter += 1
-
-    def convertToJson(self, edge_list):
-        json_String = "["
-        for i in edge_list:
-            json_String = json_String + i.to_json()
-            json_String = json_String + ","
-        json_String = json_String[:-1] + "]"
-        return json_String
+            self.node_selection_counter += 1
