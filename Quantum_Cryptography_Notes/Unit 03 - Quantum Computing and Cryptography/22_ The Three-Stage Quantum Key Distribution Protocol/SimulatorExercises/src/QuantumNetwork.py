@@ -21,6 +21,8 @@ class Quantum_Network():
         self.window = Tk()
         self.window.title('Quantum Key Distribution Network') 
         self.canvas_size = size_of_board
+        screen_width = self.window.winfo_screenwidth()
+        screen_height = self.window.winfo_screenheight()
         # self.mode = homeSelf['selectedMode']
         # self.protocol = homeSelf['selectedProtocol']
         # self.message = homeSelf['message_var']
@@ -32,29 +34,44 @@ class Quantum_Network():
         self.ksu_id_var = homeSelf.ksu_id_var.get()
         self.selectedtask = StringVar()
         self.selectedtask.set(send_message)
-        self.window.state('zoomed')
+        # self.window.state('zoomed')
+        self.window.attributes("-fullscreen", True)
         self.continue_btn = 0
         self.node_selection_counter = 0
         self.key_generated = False
         self.first_node_selected = 0
         self.adjacency_matrix =  [[0 for col in range(number_of_dots*number_of_dots)] for row in range(number_of_dots*number_of_dots)]
-
+        print(screen_width, self.canvas_size)
         # Create Frames
-        self.grid_frame = Frame(self.window, width= self.canvas_size+500, height=self.canvas_size+100)
+        self.grid_frame = Frame(
+            self.window, 
+            width=screen_width*.20, 
+            height=self.canvas_size,
+            highlightbackground="red",  # Border color
+            highlightthickness=2        # Border width
+        )
         self.grid_frame.grid(row=0, column=0, padx=10, pady=10)
 
-        self.display_frame = Frame(self.window, width= self.canvas_size+100, height=self.canvas_size+100)
+        self.display_frame = Frame(self.window, width= screen_width*.5, height=self.canvas_size+100)
         self.display_frame.grid(row=0, column=4, padx=10, pady=10)
 
-        self.controls_frame = Frame(self.window, width=self.canvas_size+500, height=200)
+        self.controls_frame = Frame(self.window, width=screen_width*.2, height=200)
         self.controls_frame.grid(row=1, column=0, padx=10, pady=10, sticky='W')
 
-        self.canvas = Canvas(self.grid_frame, width=self.canvas_size+300, height=self.canvas_size+100)
-        self.canvas.pack(fill = "both", expand = True)
+        self.canvas = Canvas(self.grid_frame, width=self.canvas_size, height=self.canvas_size)
+        self.canvas.pack(fill = "both", expand = False)
+        # path = os.path.dirname(__file__)
+        # my_file = path+'/map2.jpeg'
+        # img= ImageTk.PhotoImage(Image.open(my_file))    
+        # self.canvas.create_image( 0, 0, image = img, anchor = "nw")
+
+        # Load and scale background image
         path = os.path.dirname(__file__)
         my_file = path+'/map2.jpeg'
-        img= ImageTk.PhotoImage(Image.open(my_file))    
-        self.canvas.create_image( 0, 0, image = img, anchor = "nw")
+        original_img = Image.open(my_file)
+        resized_img = original_img.resize((int(self.canvas_size), int(self.canvas_size)), Image.Resampling.LANCZOS)
+        self.bg_image = ImageTk.PhotoImage(resized_img)
+        self.canvas.create_image(0, 0, image=self.bg_image, anchor="nw")
 
         self.left_controls_frame = Frame(self.controls_frame)
         self.left_controls_frame.grid(column=0, row=0, sticky="NW")
