@@ -47,6 +47,10 @@ class Node():
     @property
     def position(self):
          return self._position
+
+    @position.setter
+    def position(self, position):
+         self._position = position
     
     '''@position.setter
     def set_position(self, position, index):

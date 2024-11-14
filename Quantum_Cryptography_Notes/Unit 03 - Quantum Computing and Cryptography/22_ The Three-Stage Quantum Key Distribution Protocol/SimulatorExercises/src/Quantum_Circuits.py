@@ -7,6 +7,7 @@ import numpy as np
 from numpy.random import randint
 from qiskit.extensions import UnitaryGate
 from qiskit.circuit.library import IGate  
+from IPython.display import display
 
 quantumcirc= None
 window_local = None
@@ -33,17 +34,20 @@ def final_qubit_state(stateVector, matrix):
 
     return partial_statevector
 
-def create_or_reload_canvas(new_fig, col):
-    global canvas_widget
-    # Clear the existing canvas
-    if canvas_widget:
-        canvas_widget.get_tk_widget().destroy()
+def create_or_reload_canvas(new_fig, col, bloch_output):
+    # global canvas_widget
+    # # Clear the existing canvas
+    # if canvas_widget:
+    #     canvas_widget.get_tk_widget().destroy()
 
-    # Create a new FigureCanvasTkAgg widget with the new figure
-    window_local = FigureCanvasTkAgg(new_fig)
-    window_local.get_tk_widget().grid(row=col, column=4) 
+    # # Create a new FigureCanvasTkAgg widget with the new figure
+    # window_local = FigureCanvasTkAgg(new_fig)
+    # window_local.get_tk_widget().grid(row=col, column=4) 
     # window_local = FigureCanvasTkAgg(new_fig)
     # window_local.get_tk_widget().grid(row=col, column=5) 
+    with bloch_output:
+        # display(new_fig)
+        pass
 
 def intialize_circuit(window):
     global window_local
@@ -363,7 +367,7 @@ def transmit_message(number_of_nodes, message, window):
     quantumcirc = intialize_circuit(window)
     qr = QuantumRegister(number_of_nodes*2)
     quantumcirc.add_register(qr)
-    create_entangled_qubits(quantumcirc, number_of_nodes)    
+    create_entangled_qubits(quantumcirc, number_of_nodes, window)    
     print(quantumcirc)
     
     for i,message_circuit in enumerate(message_circuits):
@@ -391,7 +395,7 @@ def transmit_message(number_of_nodes, message, window):
     return recieved_message
 
 
-def create_entangled_qubits(quantumcirc, number_of_nodes, message_bit):
+def create_entangled_qubits(quantumcirc, number_of_nodes, message_bit, bloch_output):
     #print('here', index)
     nodes = number_of_nodes*2-2
     for index in range(nodes):
@@ -444,6 +448,6 @@ def create_entangled_qubits(quantumcirc, number_of_nodes, message_bit):
             list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
         plot = plot_state_qsphere(final_qubit_state(save3, list))
         plot.suptitle(f"Entanglement state for Q0 and Q"+str(2*number_of_nodes*2 -5))
-        create_or_reload_canvas(plot,0)
+        create_or_reload_canvas(plot,0, bloch_output)
         counter +=1
     

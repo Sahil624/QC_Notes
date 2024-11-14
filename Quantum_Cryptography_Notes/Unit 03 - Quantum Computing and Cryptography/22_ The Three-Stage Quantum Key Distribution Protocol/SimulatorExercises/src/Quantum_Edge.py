@@ -50,6 +50,10 @@ class Edge():
     def position(self):
         return  self._position
     
+    @position.setter
+    def position(self, position):
+        self._position = position
+    
     @property
     def canvas_position(self):
         return  self._canvas_position

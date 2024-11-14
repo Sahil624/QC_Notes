@@ -1,10 +1,15 @@
+import threading
+import time
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 from qiskit.visualization import plot_bloch_multivector
 from gates.Gate import *
+from IPython.display import display, clear_output
+from ipywidgets import widgets
 
-window_local = None
+
+window_local: widgets.Output = None
 canvas_widget = None
 qc = None
 counter = None
@@ -28,14 +33,24 @@ def start(window):
 
 # Function to create or reload the canvas with a given figure
 def create_or_reload_canvas(new_fig):
-    global canvas_widget
-    # Clear the existing canvas
-    if canvas_widget:
-        canvas_widget.get_tk_widget().destroy()
+    # global canvas_widget
+    # # Clear the existing canvas
+    # if canvas_widget:
+    #     canvas_widget.get_tk_widget().destroy()
 
-    # Create a new FigureCanvasTkAgg widget with the new figure
-    window_local = FigureCanvasTkAgg(new_fig)
-    window_local.get_tk_widget().grid(row=0, column=4, sticky="nsew")  # Use grid for placement
+    # # Create a new FigureCanvasTkAgg widget with the new figure
+    # window_local = FigureCanvasTkAgg(new_fig)
+    # window_local.get_tk_widget().grid(row=0, column=4, sticky="nsew")  # Use grid for placement
+
+    global window_local
+    # window_local.clear_output()
+    # window_local.append_display_data(new_fig)
+    with window_local:
+        window_local.clear_output(wait=True)
+        window_local.outputs = []
+        # display(new_fig)
+        window_local.append_display_data(new_fig)
+
 
 
 # Function to periodically update the canvas
@@ -45,7 +60,11 @@ def periodic_update():
     if (counter < len(channel_order)):
         # print(counter)
         circuit_transition(channel_order[counter])
-        window_local.after(500, periodic_update)  # Update every 500 milliseconds (0.5 second)
+        # window_local.after(500, periodic_update)  # Update every 500 milliseconds (0.5 second)
+        # t = threading.Timer(.5, periodic_update)
+        # t.start()
+        time.sleep(0.5)
+        periodic_update()
     return counter 
 
 def circuit_transition(gate):
