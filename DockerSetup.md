@@ -11,8 +11,9 @@
 
 1. Clone the repository:
 ```bash
-git clone git@github.com:qiselab9/QC_Notes.git
+git clone git@github.com:Sahil624/QC_Notes.git
 cd QC_Notes
+git checkout origin/docker-setup
 ```
 
 2. Start the containers (This will take few minutes to run):
