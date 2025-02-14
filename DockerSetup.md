@@ -5,19 +5,87 @@
    - [Docker for Windows](https://docs.docker.com/desktop/install/windows-install/)
    - [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/)
    - [Docker for Linux](https://docs.docker.com/engine/install/)
-   - [Docker Compose Installation](https://docs.docker.com/compose/install/)
+
+2. Git (Verify if git is install using `git --version` command)
+
+   ### 1. Follow these steps to install git on your operating system
+   <details>
+   <summary>Windows</summary>
+
+   1. Download Git from [https://git-scm.com/downloads/win](https://git-scm.com/downloads/win)
+   2. Run the installer, using default settings (or customize if you prefer)
+   </details>
+
+   <details>
+   <summary>Mac</summary>
+   1. Install using Homebrew (recommended):
+
+   ```bash
+   # Install Homebrew if not installed
+   /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"
+
+   # Install Git
+   brew install git
+   ```
+   Or download installer from [https://git-scm.com/download/mac](https://git-scm.com/download/mac)
+   </details>
+
+   <details>
+   <summary>Linux</summary>
+   
+   * Linux (Ubuntu/Debian)
+
+   ```bash
+   sudo apt update
+   sudo apt install git
+
+   # Verify installation
+   git --version
+   ```
+   OR
+
+   Use [this](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) documentation to install git in linux (according to your linux distribution)
+   </details>
+
+   ### 2. Verify installation:
+
+   Verify installation by opening Command Prompt or PowerShell and typing:
+   ```bash
+   git --version
+   ```
+   ### 3. Configure Git (First-time setup)
+
+   ``` bash
+   # Set your name
+   git config --global user.name "Your Name"
+   # Set your email
+   git config --global user.email "your.email@example.com"
+   # Optional: Set default branch name to main
+   git config --global init.defaultBranch main
+   ```
 
 ## Setup Instructions
 
+1. Open a terminal (Command Prompt or PowerShell on Windows, Terminal on Mac/Linux)
+
+2. Navigate to where you want to store the project:
+
+   ``` bash
+      # Windows example (Use your desired directory)
+      cd C:\Users\YourUsername\Documents
+
+      # Mac/Linux example (Use your desired directory)
+      cd ~/Documents
+   ```
 1. Clone the repository:
 ```bash
-git clone git@github.com:qiselab9/QC_Notes.git
+git clone https://github.com/Sahil624/QC_Notes.git
 cd QC_Notes
 ```
 
 2. Start the containers (This will take few minutes to run):
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 ## Usage Instructions
@@ -56,28 +124,28 @@ ports:
 3. If containers don't start properly:
 ```bash
 # Check container logs
-docker-compose logs
+docker compose logs
 
 # Rebuild containers
-docker-compose up --build --force-recreate
+docker compose up --build --force-recreate
 ```
 
 4. To stop the containers:
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## Common Commands
 ```bash
 # Start containers in background
-docker-compose up -d
+docker compose up -d
 
 # View container logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop containers
-docker-compose down
+docker compose down
 
 # Rebuild and restart containers
-docker-compose up --build --force-recreate
+docker compose up --build --force-recreate
 ```
