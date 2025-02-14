@@ -7,6 +7,7 @@ WORKDIR /app
 # Install system dependencies including X11 and Tkinter
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
     python3-dev \
     python3-tk \
     libx11-6 \

@@ -6,45 +6,43 @@
    - [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/)
    - [Docker for Linux](https://docs.docker.com/engine/install/)
 
-2. Git (Verify if git is install using `git --version` command)
+2. Git (Verify if git is installed using `git --version` command)
 
    ### 1. Follow these steps to install git on your operating system
    <details>
    <summary>Windows</summary>
 
-   1. Download Git from [https://git-scm.com/downloads/win](https://git-scm.com/downloads/win)
-   2. Run the installer, using default settings (or customize if you prefer)
+      1. Download Git from [https://git-scm.com/downloads/win](https://git-scm.com/downloads/win)
+      2. Run the installer, using default settings (or customize if you prefer)
    </details>
 
    <details>
    <summary>Mac</summary>
-   1. Install using Homebrew (recommended):
+      Install using Homebrew (recommended):
 
-   ```bash
-   # Install Homebrew if not installed
-   /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"
+      ```bash
+      # Install Homebrew if not installed
+      /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"
 
-   # Install Git
-   brew install git
-   ```
-   Or download installer from [https://git-scm.com/download/mac](https://git-scm.com/download/mac)
+      # Install Git
+      brew install git
+      ```
+      Or download installer from [https://git-scm.com/download/mac](https://git-scm.com/download/mac)
    </details>
 
    <details>
    <summary>Linux</summary>
-   
-   * Linux (Ubuntu/Debian)
 
-   ```bash
-   sudo apt update
-   sudo apt install git
+      * Linux (Ubuntu/Debian)
 
-   # Verify installation
-   git --version
-   ```
-   OR
+      ```bash
+      sudo apt update
+      sudo apt install git-all
+      ```
+      
+      OR
 
-   Use [this](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) documentation to install git in linux (according to your linux distribution)
+      Use [this](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) documentation to install git in linux (according to your linux distribution)
    </details>
 
    ### 2. Verify installation:
