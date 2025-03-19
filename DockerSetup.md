@@ -64,6 +64,31 @@
 
 ## Setup Instructions
 
+### Option 1 - Running from pre-built image (Easier)
+
+
+You can quickly run this environment without cloning the repository by pulling directly from DockerHub:
+```bash
+docker pull sahil624/qc_notes:latest
+```
+
+**Run the container**
+
+``` bash
+docker run -p 8888:8888 -p 8080:8080 sahil624/qc_notes:latest
+```
+
+Access Jupyter Lab at `http://localhost:8888` and noVNC at `http://localhost:8080/vnc.html` as described in the Usage Instructions section below.
+
+**Note:** When running this way, any changes you make will be lost when the container stops. For persistent storage, use the volume mounting option:
+
+``` bash
+# Run with persistent storage
+docker run -p 8888:8888 -p 8080:8080 -v ./notebooks:<any_path_in_host_to save_data> sahil624/qc_notes:latest
+```
+
+### Option 2 - Building image from source code
+
 1. Open a terminal (Command Prompt or PowerShell on Windows, Terminal on Mac/Linux)
 
 2. Navigate to where you want to store the project:
